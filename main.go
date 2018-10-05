@@ -16,6 +16,14 @@ const (
 	CALC1 = "(+ 1 2)"
 	CALC2 = "(* 1 2)"
 	CALC3 = "(* (+ 1 2) (+ 3 4))"
+
+	R21 = "(+ 1 2)"
+	R22 = "(* 1 2)"
+	R23 = "(* 2 (+ 3 4))"
+	R24 = "(* (+ 1 2) (+ 3 4))"
+	R25 = "((lambda (x) (* 2 x)) 3)"
+	R26 = "(let ((x 2)) (let ((f (lambda (y) (* x y)))) (f 3)))"
+	R27 = "(let ((x 2)) (let ((f (lambda (y) (* x y)))) (let ((x 4)) (f 3))))"
 )
 
 func matchSexp(exp string) ([]string, error) {
@@ -35,11 +43,17 @@ func matchSexp(exp string) ([]string, error) {
 			q--
 		}
 
-		if c == '(' && q == 0 {
-			// the first (
+		if c == '(' {
+			if q == 0 {
+				// the first (
+				q++
+				res = append(res, "(")
+				continue
+			}
 			q++
-			subExp := "("
-			res = append(res, subExp)
+			lastElement := []byte(res[len(res)-1])
+			lastElement = append(lastElement, byte(c))
+			res[len(res)-1] = string(lastElement)
 			continue
 		} else if q > 0 {
 			lastElement := []byte(res[len(res)-1])
@@ -48,7 +62,7 @@ func matchSexp(exp string) ([]string, error) {
 			continue
 		}
 
-		if c == ' ' {
+		if c == ' ' && q == 0 {
 			continue
 		}
 
@@ -115,31 +129,45 @@ func calc(exp string) (string, error) {
 	// match S expression
 	if sExps, err := matchSexp(exp); err == nil {
 		op := sExps[0]
-		v1, err := calc(sExps[1])
-		if err != nil {
-			return "", err
-		}
-		v2, err := calc(sExps[2])
-		if err != nil {
-			return "", err
-		}
 
-		sum, err := strOperation(op, v1, v2)
-		if err != nil {
-			return "", err
+		switch op {
+		case "lambda":
+			// function
+
+		case "let":
+			// bind
+
+		default:
+			// math operation
+			v1, err := calc(sExps[1])
+			if err != nil {
+				return "", err
+			}
+			v2, err := calc(sExps[2])
+			if err != nil {
+				return "", err
+			}
+
+			sum, err := strOperation(op, v1, v2)
+			if err != nil {
+				return "", err
+			}
+			return sum, nil
 		}
-		return sum, nil
 	}
 
 	return "", errors.New("error match")
 }
 
 func main() {
-	// exp, err := matchSexp(CALC3)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(exp)
+	exp, err := matchSexp(R25)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(exp)
+	for _, e := range exp {
+		fmt.Println(e)
+	}
 
 	// num, err := matchNumber("123dd")
 	// if err != nil {
@@ -148,10 +176,10 @@ func main() {
 	// }
 	// fmt.Println(num)
 
-	sum, err := calc(CALC3)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(sum)
+	// sum, err := calc(R25)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// fmt.Println(sum)
 }
