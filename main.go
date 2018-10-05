@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -90,6 +91,14 @@ func matchNumber(exp string) (string, error) {
 	return exp, nil
 }
 
+func matchSymbol(exp string) (string, error) {
+	ok := strings.ContainsAny(exp, "() ")
+	if ok {
+		return "", errors.New("not a symbol")
+	}
+	return exp, nil
+}
+
 func strOperation(op, v1, v2 string) (string, error) {
 	num1, err := strconv.Atoi(v1)
 	if err != nil {
@@ -121,9 +130,14 @@ func strOperation(op, v1, v2 string) (string, error) {
 func calc(exp string) (string, error) {
 	fmt.Println("calc : ", exp)
 
-	// match number
+	// number
 	if num, err := matchNumber(exp); err == nil {
 		return num, nil
+	}
+	// symbol
+	if symbol, err := matchSymbol(exp); err == nil {
+		// find value in context
+		return symbol, nil
 	}
 
 	// match S expression
