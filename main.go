@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 const (
@@ -24,10 +25,26 @@ func matchSexp(exp string) (string, error) {
 	return exp[1 : length-1], nil
 }
 
+func matchNumber(exp string) (int, error) {
+	num, err := strconv.Atoi(exp)
+	if err != nil {
+		return 0, errors.New("it is not a number")
+	}
+
+	return num, nil
+}
+
 func main() {
-	exp, err := matchSexp(SUM4)
+	// exp, err := matchSexp(SUM4)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(exp)
+
+	num, err := matchNumber("123dd")
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-	fmt.Println(exp)
+	fmt.Println(num)
 }
