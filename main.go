@@ -11,6 +11,11 @@ const (
 	SUM2 = "(1 (2 3))"
 	SUM3 = "((1 2) 3)"
 	SUM4 = "((1 2) (3 4))"
+	SUM5 = "((1 2) (3 4) (5 6) (7 8))"
+
+	CALC1 = "(+ 1 2)"
+	CALC2 = "(* 1 2)"
+	CALC3 = "(* (+ 1 2) (+ 3 4))"
 )
 
 func matchSexp(exp string) ([]string, error) {
@@ -59,7 +64,6 @@ func matchSexp(exp string) ([]string, error) {
 		}
 	}
 
-	// res must only have two elements
 	return res, nil
 }
 
@@ -72,24 +76,36 @@ func matchNumber(exp string) (string, error) {
 	return exp, nil
 }
 
-func strSum(v1 string, v2 string) (string, error) {
+func strOperation(op, v1, v2 string) (string, error) {
 	num1, err := strconv.Atoi(v1)
 	if err != nil {
 		return "", err
 	}
-
 	num2, err := strconv.Atoi(v2)
 	if err != nil {
 		return "", err
 	}
 
-	sum := num1 + num2
-	sumStr := strconv.Itoa(sum)
-	return sumStr, nil
+	var res int
+	switch op {
+	case "+":
+		res = num1 + num2
+	case "-":
+		res = num1 - num2
+	case "*":
+		res = num1 * num2
+	case "/":
+		res = num1 / num2
+	default:
+		return "", errors.New("invalid operation")
+	}
+
+	resStr := strconv.Itoa(res)
+	return resStr, nil
 }
 
-func treeSum(exp string) (string, error) {
-	fmt.Println("tree sum : ", exp)
+func calc(exp string) (string, error) {
+	fmt.Println("calc : ", exp)
 
 	// match number
 	if num, err := matchNumber(exp); err == nil {
@@ -98,15 +114,17 @@ func treeSum(exp string) (string, error) {
 
 	// match S expression
 	if sExps, err := matchSexp(exp); err == nil {
-		v1, err := treeSum(sExps[0])
+		op := sExps[0]
+		v1, err := calc(sExps[1])
 		if err != nil {
 			return "", err
 		}
-		v2, err := treeSum(sExps[1])
+		v2, err := calc(sExps[2])
 		if err != nil {
 			return "", err
 		}
-		sum, err := strSum(v1, v2)
+
+		sum, err := strOperation(op, v1, v2)
 		if err != nil {
 			return "", err
 		}
@@ -117,7 +135,7 @@ func treeSum(exp string) (string, error) {
 }
 
 func main() {
-	// exp, err := matchSexp(SUM4)
+	// exp, err := matchSexp(CALC3)
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
@@ -130,7 +148,7 @@ func main() {
 	// }
 	// fmt.Println(num)
 
-	sum, err := treeSum(SUM4)
+	sum, err := calc(CALC3)
 	if err != nil {
 		fmt.Println(err)
 		return
