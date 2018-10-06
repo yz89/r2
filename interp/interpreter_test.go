@@ -1,14 +1,15 @@
-package main
+package interp
 
 import (
 	"r2/context"
 	"testing"
 )
 
-func Test_R2(t *testing.T) {
+func Test_Execute(t *testing.T) {
 	env0 := context.Env{}
 
-	res1, err := interp(R21, env0)
+	t.Log(R21)
+	res1, err := Execute(R21, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -16,7 +17,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res2, err := interp(R22, env0)
+	t.Log(R22)
+	res2, err := Execute(R22, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,7 +26,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res3, err := interp(R23, env0)
+	t.Log(R23)
+	res3, err := Execute(R23, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -32,7 +35,17 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res5, err := interp(R25, env0)
+	t.Log(R24)
+	res4, err := Execute(R24, env0)
+	if err != nil {
+		t.Error(err)
+	}
+	if res4 != "21" {
+		t.Error("res wrong")
+	}
+
+	t.Log(R25)
+	res5, err := Execute(R25, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +53,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res6, err := interp(R26, env0)
+	t.Log(R26)
+	res6, err := Execute(R26, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +62,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res7, err := interp(R27, env0)
+	t.Log(R27)
+	res7, err := Execute(R27, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,7 +71,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res8, err := interp(R28, env0)
+	t.Log(R28)
+	res8, err := Execute(R28, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,7 +80,8 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
-	res9, err := interp(R29, env0)
+	t.Log(R29)
+	res9, err := Execute(R29, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,9 +89,10 @@ func Test_R2(t *testing.T) {
 		t.Error("res wrong")
 	}
 
+	t.Log(R262)
 	env1 := context.ExtEnv("x", "10", env0)
 	env2 := context.ExtEnv("y", "3", env1)
-	res62, err := interp(R262, env2)
+	res62, err := Execute(R262, env2)
 	if err != nil {
 		t.Error(err)
 	}
