@@ -5,11 +5,15 @@ import (
 	"testing"
 )
 
+func executeAdapter(exp string, env context.Env) (string, error) {
+	return Execute(exp, env)
+}
+
 func Test_Execute(t *testing.T) {
 	env0 := context.Env{}
 
 	t.Log(R21)
-	res1, err := Execute(R21, env0)
+	res1, err := executeAdapter(R21, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -18,7 +22,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R22)
-	res2, err := Execute(R22, env0)
+	res2, err := executeAdapter(R22, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -27,7 +31,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R23)
-	res3, err := Execute(R23, env0)
+	res3, err := executeAdapter(R23, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +40,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R24)
-	res4, err := Execute(R24, env0)
+	res4, err := executeAdapter(R24, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -45,7 +49,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R25)
-	res5, err := Execute(R25, env0)
+	res5, err := executeAdapter(R25, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -54,7 +58,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R26)
-	res6, err := Execute(R26, env0)
+	res6, err := executeAdapter(R26, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,7 +67,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R27)
-	res7, err := Execute(R27, env0)
+	res7, err := executeAdapter(R27, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -72,7 +76,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R28)
-	res8, err := Execute(R28, env0)
+	res8, err := executeAdapter(R28, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +85,7 @@ func Test_Execute(t *testing.T) {
 	}
 
 	t.Log(R29)
-	res9, err := Execute(R29, env0)
+	res9, err := executeAdapter(R29, env0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,7 +96,7 @@ func Test_Execute(t *testing.T) {
 	t.Log(R262)
 	env1 := context.ExtEnv("x", "10", env0)
 	env2 := context.ExtEnv("y", "3", env1)
-	res62, err := Execute(R262, env2)
+	res62, err := executeAdapter(R262, env2)
 	if err != nil {
 		t.Error(err)
 	}

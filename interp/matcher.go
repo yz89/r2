@@ -6,6 +6,60 @@ import (
 	"strings"
 )
 
+type R2Type byte
+
+const (
+	UNKNOWN R2Type = iota
+	VAR
+	FUNCTION
+	BIND
+	CALL
+	NUMBER
+	OPERATION
+)
+
+func matchR2Type(exp string) (R2Type, []string, error) {
+	exps := make([]string, 0)
+	// number
+	if num, err := matchNumber(exp); err == nil {
+		exps = append(exps, num)
+		return NUMBER, exps, nil
+	}
+
+	// variable
+	if vari, err := matchSymbol(exp); err == nil {
+		exps = append(exps, vari)
+		return VAR, exps, nil
+	}
+
+	// match S expression
+	if sExps, err := MatchSexp(exp); err == nil {
+		if len(sExps) == 2 {
+			// call
+			exps = append(exps, sExps[0], sExps[1])
+			return CALL, exps, nil
+		}
+
+		op := sExps[0]
+		switch op {
+		case "lambda":
+			// function
+			exps = append(exps, sExps[1], sExps[2])
+			return FUNCTION, exps, nil
+		case "let":
+			// bind
+			exps = append(exps, sExps[1], sExps[2])
+			return BIND, exps, nil
+		default:
+			// operation
+			exps = append(exps, sExps[0], sExps[1], sExps[2])
+			return OPERATION, exps, nil
+		}
+	}
+
+	return UNKNOWN, exps, errors.New("unknown type")
+}
+
 func MatchSexp(exp string) ([]string, error) {
 	length := len(exp)
 	if length < 2 {
@@ -39,7 +93,8 @@ func MatchSexp(exp string) ([]string, error) {
 				// skip space
 
 			} else {
-				// on S_VALUE, assume the first char of expression or the first char which followed space is the first char of a value
+				// on S_VALUE, assume the first char of expression or the first
+				// char which followed space is the first char of a value
 				if i == 0 || exp[i-1] == ' ' {
 					// the first char of value
 					res = append(res, string(c))

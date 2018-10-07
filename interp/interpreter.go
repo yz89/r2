@@ -51,101 +51,84 @@ func strOperation(op, v1, v2 string) (string, error) {
 
 func Execute(exp string, env context.Env) (string, error) {
 	fmt.Println("Execute:", exp)
-
-	// number
-	if num, err := matchNumber(exp); err == nil {
-		return num, nil
+	t, exps, err := matchR2Type(exp)
+	if err != nil {
+		return "", err
 	}
 
-	// variable
-	if vari, err := matchSymbol(exp); err == nil {
+	switch t {
+	case NUMBER:
+		return exps[0], nil
+	case BIND:
+		bindPairs, err := MatchSexp(exps[0])
+		if err != nil {
+			return "", err
+		}
+		x := bindPairs[0]
+		v, err := Execute(bindPairs[1], env)
+		if err != nil {
+			return "", err
+		}
+		newEnv := context.ExtEnv(x, v, env)
+		res, err := Execute(exps[1], newEnv)
+		if err != nil {
+			return "", err
+		}
+		return res, nil
+	case VAR:
 		// find value in context
-		v, err := context.Lookup(vari, env)
+		v, err := context.Lookup(exps[0], env)
 		if err != nil {
 			return "", err
 		}
 		return v, nil
-	}
-
-	// match S expression
-	if sExps, err := MatchSexp(exp); err == nil {
-
-		if len(sExps) == 2 {
-			// function call
-			// fmt.Println("call", sExps)
-			v1, err := Execute(sExps[0], env)
-			if err != nil {
-				return "", err
-			}
-			v2, err := Execute(sExps[1], env)
-			if err != nil {
-				return "", err
-			}
-			var cl Closure
-			err = cl.Deserialize(v1)
-			// fmt.Println("v1", v1)
-			// fmt.Println("cl.env", cl.env)
-			if err != nil {
-				return "", err
-			}
-			newEnv := context.ExtEnv(cl.param, v2, cl.env)
-			res, err := Execute(cl.exp, newEnv)
-			if err != nil {
-				return "", err
-			}
-			return res, nil
+	case FUNCTION:
+		var cl Closure
+		cl.param = exps[0][1 : len(exps[0])-1]
+		cl.exp = exps[1]
+		cl.env = env
+		res, err := cl.Serialize()
+		if err != nil {
+			return "", err
+		}
+		return res, nil
+	case CALL:
+		f, err := Execute(exps[0], env)
+		if err != nil {
+			return "", err
+		}
+		arg, err := Execute(exps[1], env)
+		if err != nil {
+			return "", err
+		}
+		var cl Closure
+		if err := cl.Deserialize(f); err != nil {
+			return "", err
 		}
 
-		op := sExps[0]
-		switch op {
-		case "lambda":
-			// function
-			// fmt.Println("function", sExps)
-			cl := Closure{
-				param: sExps[1][1 : len(sExps[1])-1],
-				exp:   sExps[2],
-				env:   env,
-			}
-			if clStr, err := cl.Serialize(); err == nil {
-				return clStr, nil
-			}
-			return "", errors.New("error lambda exp")
-		case "let":
-			// bind
-			// fmt.Println("bind", sExps)
-			e, err := MatchSexp(sExps[1])
-			if err != nil {
-				return "", err
-			}
-			x := e[0]
-			v, err := Execute(e[1], env)
-			if err != nil {
-				return "", err
-			}
-			newEnv := context.ExtEnv(x, v, env)
-			res, err := Execute(sExps[2], newEnv)
-			if err != nil {
-				return "", err
-			}
-			return res, nil
-		default:
-			// math operation
-			v1, err := Execute(sExps[1], env)
-			if err != nil {
-				return "", err
-			}
-			v2, err := Execute(sExps[2], env)
-			if err != nil {
-				return "", err
-			}
-
-			sum, err := strOperation(op, v1, v2)
-			if err != nil {
-				return "", err
-			}
-			return sum, nil
+		newEnv := context.ExtEnv(cl.param, arg, cl.env)
+		res, err := Execute(cl.exp, newEnv)
+		if err != nil {
+			return "", err
 		}
+		return res, nil
+	case OPERATION:
+		op := exps[0]
+		v1, err := Execute(exps[1], env)
+		if err != nil {
+			return "", err
+		}
+		v2, err := Execute(exps[2], env)
+		if err != nil {
+			return "", err
+		}
+		res, err := strOperation(op, v1, v2)
+		if err != nil {
+			return "", err
+		}
+		return res, nil
+	default:
 	}
 
-	return "", errors.New("error match")
+	return "", errors.New("executed failed")
 }
