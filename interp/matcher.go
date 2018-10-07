@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func matchSexp(exp string) ([]string, error) {
+func MatchSexp(exp string) ([]string, error) {
 	length := len(exp)
 	if length < 2 {
 		return nil, errors.New("length too short")
@@ -15,56 +15,67 @@ func matchSexp(exp string) ([]string, error) {
 		return nil, errors.New("() not match")
 	}
 
+	type State byte
+	const (
+		S_VALUE State = iota
+		S_SEXP
+	)
+
 	var res []string
-	q := 0
+	state := S_VALUE
+	parCount := 0
+
+	// remove the parenthesis
 	exp = exp[1 : length-1]
 	for i, c := range exp {
-		if c == ')' {
-			q--
-		}
-
-		if c == '(' {
-			if q == 0 {
-				// the first (
-				q++
+		switch state {
+		case S_VALUE:
+			if c == '(' {
+				// the first (, enter S_SEXP
+				parCount++
 				res = append(res, "(")
-				continue
-			}
-			q++
-			lastElement := []byte(res[len(res)-1])
-			lastElement = append(lastElement, byte(c))
-			res[len(res)-1] = string(lastElement)
-			continue
-		} else if q > 0 {
-			lastElement := []byte(res[len(res)-1])
-			lastElement = append(lastElement, byte(c))
-			res[len(res)-1] = string(lastElement)
-			continue
-		}
+				state = S_SEXP
+			} else if c == ' ' {
+				// skip space
 
-		if c == ' ' && q == 0 {
-			continue
-		}
-
-		if q == 0 {
-			if i == 0 || exp[i-1] == ' ' {
-				// the first char
-				res = append(res, string(c))
-				continue
+			} else {
+				// on S_VALUE, assume the first char of expression or the first char which followed space is the first char of a value
+				if i == 0 || exp[i-1] == ' ' {
+					// the first char of value
+					res = append(res, string(c))
+					continue
+				}
+				// read value, append c to the last string
+				lastChar := []byte(res[len(res)-1])
+				lastChar = append(lastChar, byte(c))
+				res[len(res)-1] = string(lastChar)
 			}
-			lastElement := []byte(res[len(res)-1])
-			lastElement = append(lastElement, byte(c))
-			res[len(res)-1] = string(lastElement)
+		case S_SEXP:
+			if c == '(' {
+				parCount++
+			} else if c == ')' {
+				parCount--
+			}
+			// read S expression, append c to the last string
+			lastChar := []byte(res[len(res)-1])
+			lastChar = append(lastChar, byte(c))
+			res[len(res)-1] = string(lastChar)
+			if parCount == 0 {
+				// enter S_VALUE
+				state = S_VALUE
+			}
+		default:
+			panic("error state")
 		}
 	}
 
-	// case (((((+ 1 2)))))
+	// case (((((+ 1 2))))) -> (+ 1 2)
 	if len(res) == 1 {
-		res1, err := matchSexp(res[0])
+		resNext, err := MatchSexp(res[0])
 		if err != nil {
 			return nil, err
 		}
-		return res1, nil
+		return resNext, nil
 	}
 
 	return res, nil

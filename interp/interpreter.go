@@ -68,7 +68,7 @@ func Execute(exp string, env context.Env) (string, error) {
 	}
 
 	// match S expression
-	if sExps, err := matchSexp(exp); err == nil {
+	if sExps, err := MatchSexp(exp); err == nil {
 
 		if len(sExps) == 2 {
 			// function call
@@ -113,7 +113,7 @@ func Execute(exp string, env context.Env) (string, error) {
 		case "let":
 			// bind
 			// fmt.Println("bind", sExps)
-			e, err := matchSexp(sExps[1])
+			e, err := MatchSexp(sExps[1])
 			if err != nil {
 				return "", err
 			}

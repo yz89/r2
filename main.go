@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	// exp, err := matchSexp(R262)
+	// exp, err := interp.MatchSexp(interp.R29)
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
@@ -17,7 +17,7 @@ func main() {
 	// }
 
 	env0 := context.Env{}
-	res, err := interp.Execute(interp.R24, env0)
+	res, err := interp.Execute(interp.R27, env0)
 	if err != nil {
 		fmt.Println(err)
 		return
