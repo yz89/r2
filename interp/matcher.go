@@ -79,7 +79,7 @@ func MatchSexp(exp string) ([]string, error) {
 	state := S_VALUE
 	parCount := 0
 
-	// remove the parenthesis
+	// remove the outermost parenthesis
 	exp = exp[1 : length-1]
 	for i, c := range exp {
 		switch state {
